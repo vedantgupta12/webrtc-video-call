@@ -27,10 +27,11 @@ export default function RoomPage() {
   } = useWebRTC();
 
 
-
+    const [copied, setCopied] = useState(false);
   const [isMicOn, setIsMicOn] = useState(true);
   const [isCameraOn, setIsCameraOn] = useState(true);
   const [isCallActive, setIsCallActive] = useState(false);
+  const [roomLink, setRoomLink] = useState("");
 
 
   const [isRemoteMicOn, setIsRemoteMicOn] = useState(true);
@@ -45,6 +46,24 @@ export default function RoomPage() {
     useState<RTCPeerConnectionState>("new");
 
     const [isScreenSharing, setIsScreenSharing] = useState(false);
+
+    useEffect(() => {
+  setRoomLink(`${window.location.origin}/room/${roomId}`);
+}, [roomId]);
+
+    const handleCopyLink = async () => {
+  try {
+    await navigator.clipboard.writeText(window.location.href);
+
+    setCopied(true);
+
+    setTimeout(() => {
+      setCopied(false);
+    }, 2000);
+  } catch (error) {
+    console.error("Failed to copy link:", error);
+  }
+};
 
   useEffect(() => {
     if (!roomId) return;
@@ -778,13 +797,30 @@ return (
                     Share this room with someone to start the call.
                   </p>
 
-                  <div className="mt-5 rounded-full border border-white/10 bg-white/[0.03] px-4 py-2 text-sm text-white/50">
-                    Room:{" "}
+                 <div className="mt-6 w-full max-w-md">
 
-                    <span className="font-semibold text-white/80">
-                      {roomId}
-                    </span>
-                  </div>
+  <p className="mb-2 text-center text-xs font-medium uppercase tracking-wider text-white/30">
+    Invite someone to join
+  </p>
+
+  <div className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/[0.03] p-2">
+
+    <div className="min-w-0 flex-1 px-2">
+      <p className="truncate text-sm text-white/60">
+         {roomLink || "Generating invite link..."}
+      </p>
+    </div>
+
+    <button
+      onClick={handleCopyLink}
+      className="shrink-0 rounded-lg bg-teal-400 px-4 py-2 text-sm font-semibold text-[#0A0D12] transition hover:bg-teal-300 active:scale-95"
+    >
+      {copied ? "✓ Copied" : "Copy Link"}
+    </button>
+
+  </div>
+
+</div>
 
                 </div>
               )}
